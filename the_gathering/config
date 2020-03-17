@@ -1,0 +1,11 @@
+sites:
+- vdab
+- indeed
+
+vdab : "https://www.vdab.be/vindeenjob/vacatures?sort=datum&jobdomein=JOBCAT10&p="
+indeed : "https://be.indeed.com/jobs?q=IT&sort=date&start="
+
+
+break_urls: {
+vdab: "https://www.vdab.be/vindeenjob/vacatures/60876980/itzu-jobs---b2b-helpdeskmedewerker-software",
+indeed: ""}

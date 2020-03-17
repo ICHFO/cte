@@ -1,3 +1,5 @@
+gecko : /usr/bin/gd
+
 sites:
 - vdab
 - indeed

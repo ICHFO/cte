@@ -1,0 +1,18 @@
+#!/usr/bin/python
+import scrapers
+import yaml
+
+config = None
+
+with open('config.yaml') as f:
+        config = yaml.load(f, Loader=yaml.Loader)
+
+site = 'vdab'
+base_url = config.get(site)
+s = scrapers.Scraper(site)(base_url)
+s.break_url = config.get('break_urls').get(site)
+l = s.scrape_pages(init=False)
+
+s.driver.close()
+
+exit(0)

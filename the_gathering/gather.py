@@ -1,16 +1,23 @@
 #!/usr/bin/python3
-import scrapers
-import yaml
+import scrapers, sys, getopt
 
-config = None
+site = ''
 
-with open('config.yaml') as f:
-    config = yaml.load(f, Loader=yaml.Loader)
+opt_str="hs:"
+try:
+	opts, args = getopt.getopt(sys.argv[1:],opt_str,["site="])
+except getopt.GetoptError:
+	print('gather -s site')
+	sys.exit(2)
 
-site = 'vdab'
+for opt, arg in opts:
+	if opt == '-h':
+		print('gather -s site')
+		sys.exit()
+	elif opt in ('-s','--site'):
+		site = arg
+
 s = scrapers.Scraper(site)
-l = s.scrape_pages(init=True)
+s.scrape_pages()
 
-s.driver.close()
-
-exit(0)
+sys.exit()

@@ -53,7 +53,7 @@ class _Scraper():
 			try:
 				self.driver.get(url)
 			except TimeoutException:
-				print(f"datetime.now()} : timeout occured")
+				print(f"{datetime.now()} : timeout occured")
 				self.ex_count += 1
 			vacancy = dict( site=self.site,
 							scrape_date=str(datetime.date(datetime.now())),

@@ -1,7 +1,10 @@
 #!/usr/bin/python3
-import scrapers, sys, getopt
+import sys, getopt
+from scrapers import Scraper
 
-site = ''
+sites = [ 'amon','indeed','vdab']
+
+site = 'all'
 
 opt_str="hs:"
 try:
@@ -17,7 +20,11 @@ for opt, arg in opts:
 	elif opt in ('-s','--site'):
 		site = arg
 
-s = scrapers.Scraper(site)
-s.scrape_pages()
+if site == 'all':
+	for s in sites:
+		Scraper(s).scrape_pages()
+else:
+	Scraper(site).scapre_pages()
+
 
 sys.exit()

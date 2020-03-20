@@ -3,6 +3,7 @@ import yaml
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from selenium.common.exceptions import TimeoutException
 
 with open('config.yaml') as f:
 	config = yaml.load(f)
@@ -39,6 +40,7 @@ class _Scraper():
 		self.links = list()
 		self.driver = _get_driver()
 		self.driver.implicitly_wait(1)
+		self.ex_count = 0
 
 	def __del__(self):
 		if self.driver:
@@ -48,7 +50,11 @@ class _Scraper():
 		self.extract_urls()
 		print(f"{datetime.now()} : Scraping {len(self.links)} pages")
 		for url in self.links:
-			self.driver.get(url)
+			try:
+				self.driver.get(url)
+			except TimeoutException:
+				print(f"datetime.now()} : timeout occured")
+				self.ex_count += 1
 			vacancy = dict( site=self.site,
 							scrape_date=str(datetime.date(datetime.now())),
 							url=url,
@@ -56,7 +62,7 @@ class _Scraper():
 			r = vcol.insert_one(vacancy)
 		if len(self.links) > 0:
 			scol.update_one({"site": self.site},{'$set': { 'break_url' : self.links[0]}})
-			print(f"{datetime.now()} : {len(self.links)} new pages added")
+			print(f"{datetime.now()} : {len(self.links) - self.ex_count} new pages added")
 		else:
 			print(f"{datetime.now()} : No new pages added.")
 

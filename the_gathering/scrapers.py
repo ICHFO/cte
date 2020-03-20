@@ -68,6 +68,20 @@ class _Scraper():
 
 # SITE SPECIFIC SCRAPER IMPLEMENTAIONS
 ######################################
+class AmonScraper(_Scraper):
+	def extract_urls(self):
+		print(f"{datetime.now()} : collecting links.")
+		for in in range(0,14):
+			url = f"{self.base_url}{i}"
+			self.driver.get(url)
+			for  w in self.driver.window_handles:
+                self.driver.switch_to_window(w)
+				for e in self.driver.find_elements_by_class_name('vacancy'):
+					link = e.get_attribute('href')
+					if link == self.break_url:
+						return
+					self.links.append(link)
+
 
 class VdabScraper(_Scraper):
 	def extract_urls(self):

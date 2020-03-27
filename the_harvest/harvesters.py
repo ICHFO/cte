@@ -68,7 +68,7 @@ class _Harvester():
 					'url'			: url,
 					'source'		: self.driver.page_source
 				}
-				vcol..insert_one(vac)
+				vcol.insert_one(vac)
 			except TimeoutException:
 				logging.error(f"timeout occured")
 				self.ex_count += 1

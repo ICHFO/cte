@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 import sys, getopt
-from scrapers import Scraper
+from harvesters import Harvester
 
-sites = [ 'amon','indeed','vdab']
+sites = [ 'amon','careerjet','indeed','jobat','vdab']
 
 site = 'all'
 
@@ -22,9 +22,9 @@ for opt, arg in opts:
 
 if site == 'all':
 	for s in sites:
-		Scraper(s).scrape_pages()
+		Harvester(s).scrape_pages()
 else:
-	Scraper(site).scapre_pages()
+	Harvester(site).scrape_pages()
 
 
 sys.exit()

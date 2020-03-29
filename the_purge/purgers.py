@@ -2,6 +2,9 @@ import pymongo, traceback, sys
 from pymongo.errors import BulkWriteError
 from bs4 import BeautifulSoup
 from datetime import datetime
+from config import Config as cfg
+from setup import get_mongo_client, get_es_client
+
 
 def Purger(site):
 	purger_dict = {
@@ -17,14 +20,11 @@ def Purger(site):
 		print('Not implemented')
 		exit(1)
 
-def _get_db():
-	return pymongo.MongoClient('penny.infocura.lan')['cte']
-
-
 class _Purger():
 	def __init__(self, site):
 		self.site = site
-		self.db = _get_db()	
+		self.db = get_mongo_client()['cte']
+		self.es = get_es_client()
 
 	def run(self):
 		self.db.vac_p.drop()
@@ -38,9 +38,12 @@ class _Purger():
 					'site' : doc.get('site'),
 					'url'  : doc.get('url'),
 					'company' : self.get_company(soup),
+					'title' : self.get_title(soup),
 					'location' : self.get_location(soup),
-					'date_online' : self.get_date_online(soup),
-					'description' : self.get_description(soup)
+					'date' : self.get_date_online(soup),
+					'description' : self.get_description(soup),
+					'skills' : self.get_skills(soup),
+					'offer'	: self.get_offer(soup)
 				}
 				doc_lst.append(p_doc)
 			except Exception:
@@ -50,15 +53,42 @@ class _Purger():
 			prev_url = doc.get('url')
 		print("inserting documents")
 		self.db.vac_p.insert_many(doc_lst)
+	
+	def get_title(self,soup):
+		return "unknown"
 
+	def get_company(self,soup):
+		return "unkown"
+
+	def get_zip(eself,soup):
+		return "unknown"
+
+	def get_location(self,soup):
+		return "unknown"
+
+	def get_date(self,soup):
+		return "unknown"
+
+	def get_description(self,soup):
+		return "unknown"
+
+	def get_skills(self,soup):
+		return "unknown"
+
+	def get_offer(self,soup):
+		return "unkown"
 
 class VdabPurger(_Purger):
+	def get_title(self,soup):
+		title=  soup.find('h1',id='vej-vacature-detail-title').get_text()
+		return title.replace('\n','').lstrip().rstrip()
+
 	def get_company(self, soup):
 		t1 = soup.find_all('p', class_='mb0')[0]
 		company = t1.find_all('strong')[0].get_text()
 		return company.lower()
 	
-	def get_post_code(self, soup):
+	def get_zip(self, soup):
 		tag = soup.find('span',itemprop='postalCode')
 		if tag:
 			return tag.get_text(strip=True)

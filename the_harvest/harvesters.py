@@ -1,5 +1,5 @@
 import pymongo, yaml, logging
-from pymongo import MongoClient
+from setup import get_mongo, Config as cfg
 from pymongo.errors import DuplicateKeyError, WriteError
 from datetime import datetime
 from selenium import webdriver

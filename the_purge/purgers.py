@@ -1,4 +1,26 @@
-import pymongo, traceback, sys
+The Purge:
+Maakt van een document een verfijnder document en slaagt dat op in mongo
+
+vacancies collect:
+{
+    site : string -> 'vdab'/'indeed'/'jobat'/....
+    scrape_date : date 
+    url : string
+    source : string -> volledige html pagina als string
+}
+
+vac_p collection:
+{
+    site : string
+    url : string
+    company : string
+    title : string
+    location : string
+    date : date -> date vacancy was put online
+    description : string
+    skills : string
+    offer : string
+}import pymongo, traceback, sys
 from pymongo.errors import BulkWriteError
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -37,7 +59,6 @@ class _Purger():
                     'url'  : doc.get('url'),
                     'company' : self.get_company(soup),
                     'title' : self.get_title(soup),
-                    'zip_code' : self.get_zip(soup),
                     'location' : self.get_location(soup),
                     'date' : self.get_date(soup),
                     'description' : self.get_description(soup),
@@ -53,28 +74,28 @@ class _Purger():
         print("inserting documents")
         self.db.vac_p.insert_many(doc_lst)
 
-    def get_title(self, soup):
+    def get_title(self ,soup):
         return "unknown"
 
-    def get_company(self, soup):
+    def get_company(self ,soup):
         return "unkown"
 
-    def get_zip(self, soup):
+    def get_zip(eself ,soup):
         return "unknown"
 
-    def get_location(self, soup):
+    def get_location(self ,soup):
         return "unknown"
 
-    def get_date(self, soup):
+    def get_date(self ,soup):
         return "unknown"
 
-    def get_description(self, soup):
+    def get_description(self ,soup):
         return "unknown"
 
-    def get_skills(self, soup):
+    def get_skills(self ,soup):
         return "unknown"
 
-    def get_offer(self, soup):
+    def get_offer(self ,soup):
         return "unkown"
 
 
@@ -111,10 +132,11 @@ class VdabPurger(_Purger):
         text = soup.find('span' ,itemprop='description').get_text()
         text += soup.find('p', class_='mb1' ,itemprop='skills').get_text()
         tag = soup.find('ul' ,class_='competenties')
-        if tag:
-            text += tag.get_text()
+        if tag : text += tag.get_text()
         return text
 
+	def get_skills(self,soup):
+		
 
 if __name__ == '__main__':
     p = Purger('vdab')

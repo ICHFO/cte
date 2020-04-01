@@ -9,7 +9,9 @@ for doc in mcur:
 	es_doc = {
 		'company' : doc.get('company'),
 		'location' : doc.get('location'),
-		'description' : doc.get('description')
+		'description' : doc.get('description'),
+		'url' : doc.get('url'),
+		'date' : doc.get('date')
 	}
 	res = es.index(index='v_test',doc_type='vac',id=doc.get('_id'),body=es_doc)
 	print(res)

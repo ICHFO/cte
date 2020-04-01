@@ -1,4 +1,26 @@
-import pymongo, traceback, sys
+The Purge:
+Maakt van een document een verfijnder document en slaagt dat op in mongo
+
+vacancies collect:
+{
+    site : string -> 'vdab'/'indeed'/'jobat'/....
+    scrape_date : date 
+    url : string
+    source : string -> volledige html pagina als string
+}
+
+vac_p collection:
+{
+    site : string
+    url : string
+    company : string
+    title : string
+    location : string
+    date : date -> date vacancy was put online
+    description : string
+    skills : string
+    offer : string
+}import pymongo, traceback, sys
 from pymongo.errors import BulkWriteError
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -113,6 +135,9 @@ class VdabPurger(_Purger):
 		tag = soup.find('ul',class_='competenties')
 		if tag : text += tag.get_text()
 		return text
+
+	def get_skills(self,soup):
+		
 
 if __name__ == '__main__':
 	p = Purger('vdab')

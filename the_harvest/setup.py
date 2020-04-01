@@ -1,3 +1,6 @@
+from pymongo import MongoClient
+from elasticsearch import Elasticsearch
+
 class Config:
         db2_host = "dasha.infocura.lan"
         db2_user = "ic"
@@ -9,22 +12,17 @@ class Config:
 
         elastic_host = "dasha.infocura.lan"
 
-		gecko_bin = "/usr/bin/gd"
-		gecko_log = "/var/log/the_harvest/"
+        gecko_bin = "/usr/bin/gd"
+        gecko_log = "/var/log/the_harvest/"
 
-		log_path = "/var/log/cte/the_harvest/"
-		log_level = "INFO"
-		log_fmt = "%(asctime)s - %(levelname)s: %(message)s"
-		log_date_fmt = "%H:%M:%S"
+        log_path = "/var/log/cte/the_harvest/"
+        log_level = "INFO"
+        log_fmt = "%(asctime)s - %(levelname)s: %(message)s"
+        log_date_fmt = "%H:%M:%S"
 
-
-def get_db2c():
-    cstr = f"DATABASE={cfg.db2_db};HOSTNAME={cfg.db2_host};PORT={cfg.db2_port};PROTOCOL=TCPIP;UID={cfg.db2_user};PWD={cfg.db2_pass}"
-    db2c = ibm_db.connect(cstr,'','')
-    return db2c
 
 def get_mongo():
-    return MongoClient(cfg.mongo_host)
+    return MongoClient(Config.mongo_host)
 
 
 def get_elastic():

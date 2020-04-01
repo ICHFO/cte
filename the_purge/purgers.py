@@ -1,26 +1,4 @@
-The Purge:
-Maakt van een document een verfijnder document en slaagt dat op in mongo
-
-vacancies collect:
-{
-    site : string -> 'vdab'/'indeed'/'jobat'/....
-    scrape_date : date 
-    url : string
-    source : string -> volledige html pagina als string
-}
-
-vac_p collection:
-{
-    site : string
-    url : string
-    company : string
-    title : string
-    location : string
-    date : date -> date vacancy was put online
-    description : string
-    skills : string
-    offer : string
-}import pymongo, traceback, sys
+import pymongo, traceback, sys
 from pymongo.errors import BulkWriteError
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -30,11 +8,11 @@ from setup import get_mongo_client, get_es_client
 
 def Purger(site):
     purger_dict = {
-        'amon'	: None,
-        'careerjet'	: None,
-        'indeed'	: None,
-        'jobat'		: None,
-        'vdab'		: VdabPurger,
+        'amon': None,
+        'careerjet': None,
+        'indeed': None,
+        'jobat': None,
+        'vdab'	: VdabPurger,
     }
     if purger_dict.get(site):
         return purger_dict.get(site)(site)
@@ -55,15 +33,15 @@ class _Purger():
             soup = BeautifulSoup(doc.get('source') ,'html.parser')
             try:
                 p_doc = {
-                    'site' : doc.get('site'),
-                    'url'  : doc.get('url'),
-                    'company' : self.get_company(soup),
-                    'title' : self.get_title(soup),
-                    'location' : self.get_location(soup),
-                    'date' : self.get_date(soup),
-                    'description' : self.get_description(soup),
-                    'skills' : self.get_skills(soup),
-                    'offer'	: self.get_offer(soup)
+                    'site': doc.get('site'),
+                    'url': doc.get('url'),
+                    'company': self.get_company(soup),
+                    'title': self.get_title(soup),
+                    'location': self.get_location(soup),
+                    'date': self.get_date(soup),
+                    'description': self.get_description(soup),
+                    'skills': self.get_skills(soup),
+                    'offer': self.get_offer(soup)
                 }
                 doc_lst.append(p_doc)
             except Exception:
@@ -74,33 +52,33 @@ class _Purger():
         print("inserting documents")
         self.db.vac_p.insert_many(doc_lst)
 
-    def get_title(self ,soup):
+    def get_title(self, soup):
         return "unknown"
 
-    def get_company(self ,soup):
+    def get_company(self, soup):
         return "unkown"
 
-    def get_zip(eself ,soup):
+    def get_zip(eself, soup):
         return "unknown"
 
-    def get_location(self ,soup):
+    def get_location(self, soup):
         return "unknown"
 
-    def get_date(self ,soup):
+    def get_date(self, soup):
         return "unknown"
 
-    def get_description(self ,soup):
+    def get_description(self, soup):
         return "unknown"
 
-    def get_skills(self ,soup):
+    def get_skills(self, soup):
         return "unknown"
 
-    def get_offer(self ,soup):
+    def get_offer(self, soup):
         return "unkown"
 
 
 class VdabPurger(_Purger):
-    def get_title(self ,soup):
+    def get_title(self, soup):
         title = soup.find('h1', id='vej-vacature-detail-title').get_text()
         return title.replace('\n', '').lstrip().rstrip()
 
@@ -110,7 +88,7 @@ class VdabPurger(_Purger):
         return company.lower()
 
     def get_zip(self, soup):
-        tag = soup.find('span' ,itemprop='postalCode')
+        tag = soup.find('span', itemprop='postalCode')
         if tag:
             return tag.get_text(strip=True)
         return "unknown"
@@ -122,21 +100,20 @@ class VdabPurger(_Purger):
         return soup.find('span', itemprop='address').get_text(strip=True).lower()
 
     def get_date(self, soup):
-        mmap = {'jan.' :1, 'feb.' :2, 'mrt.' :3, 'apr.' :4, 'mei' :5, 'jun.' :6, 'jul.' :7,
-                'aug.' :9, 'sep.' :9, 'okt.' :10, 'nov.' :11, 'dec.' :12 }
+        mmap = {'jan.': 1, 'feb.': 2, 'mrt.': 3, 'apr.': 4, 'mei': 5, 'jun.': 6, 'jul.': 7,
+                'aug.': 9, 'sep.': 9, 'okt.': 10, 'nov.': 11, 'dec.': 12}
         dlst = soup.find_all('p', class_='mb0')[1].span.get_text(strip=True).split(' ')
         dt_online = datetime.strptime(f"{dlst[4]}-{mmap.get(dlst[3])}-{dlst[2]}", '%Y-%m-%d')
         return dt_online
 
     def get_description(self, soup):
-        text = soup.find('span' ,itemprop='description').get_text()
-        text += soup.find('p', class_='mb1' ,itemprop='skills').get_text()
-        tag = soup.find('ul' ,class_='competenties')
-        if tag : text += tag.get_text()
+        text = soup.find('span', itemprop='description').get_text()
+        text += soup.find('p', class_='mb1', itemprop='skills').get_text()
+        tag = soup.find('ul', class_='competenties')
+        if tag:
+            text += tag.get_text()
         return text
 
-	def get_skills(self,soup):
-		
 
 if __name__ == '__main__':
     p = Purger('vdab')

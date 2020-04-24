@@ -1,10 +1,13 @@
-import pymongo, yaml, logging
-#from setup import get_mongo, Config as cfg
+import ibm_db
+import pymongo
+import yaml
+import logging
 from pymongo.errors import DuplicateKeyError, WriteError
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.common.exceptions import TimeoutException
+
 
 with open('/home/ic/cte/the_harvest/config.yaml') as f:
     cfg = yaml.load(f)
@@ -54,9 +57,14 @@ class _Harvester():
         self.driver.implicitly_wait(1)
         self.ex_count = 0
 
+        db2_cstr = "DATABASE=cte;HOSTNAME=skye.infocura.lan;PORT=50001;PROTOCOL=TCPIP;UID=ic;PWD=icmaster"
+        self.db2_conn = ibm_db.connect(db2_cstr, '', '')
+
     def __del__(self):
         if self.driver:
             self.driver.close()
+        if self.db2_conn:
+            ibm_db.close(self.db2_conn)
 
     def scrape_pages(self):
         self.extract_urls()
@@ -82,6 +90,7 @@ class _Harvester():
         if len(self.links) > 0:
             scol.update_one({"site": self.site },{'$set':{ 'break_ur' : self.links[0]}})
             logging.info(f"{len(self.links) - self.ex_count} new pages added")
+            self.add_db2_record(url, self.driver.page_source)
         else:
             logging.info("no new pages added")
 
@@ -93,6 +102,15 @@ class _Harvester():
         finally:
             vcol.find_one_and_update({'url ':url},
                                      {'$set': {'source': self.driver.page_source}})
+            self.add_db2_record(url, self.driver.page_source)
+
+    def add_db2_record(self, url: str, html: str):
+        sql = f"insert into cte.vancany_raw (url, html) values ('{url}', '{html}')"
+        try:
+            stmt = ibm_db.exec_immediate(self.db2_conn, sql)
+        except:
+            logging.info(f"insert failed for {url}")
+
 
 
 ########################################

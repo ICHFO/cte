@@ -90,7 +90,7 @@ class _Harvester():
         if len(self.links) > 0:
             scol.update_one({"site": self.site },{'$set':{ 'break_ur' : self.links[0]}})
             logging.info(f"{len(self.links) - self.ex_count} new pages added")
-            self.add_db2_record(url, self.driver.page_source)
+            self.add_db2_record(site, url, self.driver.page_source)
         else:
             logging.info("no new pages added")
 
@@ -102,12 +102,14 @@ class _Harvester():
         finally:
             vcol.find_one_and_update({'url ':url},
                                      {'$set': {'source': self.driver.page_source}})
-            self.add_db2_record(url, self.driver.page_source)
+            self.add_db2_record(site, url, self.driver.page_source)
 
-    def add_db2_record(self, url: str, html: str):
-        sql = f"insert into cte.vancany_raw (url, html) values ('{url}', '{html}')"
+    def add_db2_record(self, site: str, url: str, html: str):
+        sql = f"insert into cte.vancany_raw (url, html) values (?, ?, ?)"
+        stmt = ibm_db.prepare(self.db2_conn, sql)
+        params = site, url, html
         try:
-            stmt = ibm_db.exec_immediate(self.db2_conn, sql)
+            ibm_db.execute(stmt, params)
         except:
             logging.info(f"insert failed for {url}")
 
